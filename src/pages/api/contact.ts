@@ -3,19 +3,25 @@ import { NextApiRequest, NextApiResponse } from "next";
 import nodemailer from "nodemailer";
 
 export default function sendGmail(req: NextApiRequest, res: NextApiResponse) {
+  const hostGmail = process.env.GMAILUSER;
+  const password = process.env.GMAILPASSWORD;
+
+  console.log(hostGmail, password);
+
   const transporter = nodemailer.createTransport({
-    host: "smpt.gmail.com",
-    port: 587,
+    service: "Gmail",
+    port: 465,
+    secure: true,
     auth: {
-      user: process.env.GMAILLUSER,
-      pass: process.env.GMAILPASSWORD,
+      user: hostGmail,
+      pass: password,
     },
   });
 
   // 管理人が受け取るメール
   const toHostMailData = {
     from: req.body.email,
-    to: process.env.GMAILLUSER,
+    to: hostGmail,
     subject: `[お問い合わせ]${req.body.name}様より`,
     text: `${req.body.message} Send from ${req.body.email}`,
     html: `
@@ -32,5 +38,5 @@ export default function sendGmail(req: NextApiRequest, res: NextApiResponse) {
     if (err) console.log(err);
     else console.log(info);
   });
-  return res.send("成功しました");
+  return res.send(`送信先:${hostGmail}`);
 }
